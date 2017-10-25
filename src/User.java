@@ -11,4 +11,8 @@ public class User implements Runnable {
     public void run(){
 
     }
+
+    public void read(BusList busList){
+
+    }
 }
