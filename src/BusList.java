@@ -66,9 +66,17 @@ public class BusList {
                     nextBus.prev = newBus;
                 }
                 this.size++;
+            } else{
+                newBus.prev = busToInsertAfter;
+                busToInsertAfter.next = newBus;
+                this.size++;
             }
 
         }
+    }
+
+    public synchronized void delete(){
+        
     }
 
 }
