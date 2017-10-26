@@ -8,6 +8,14 @@ public class User implements Runnable {
     final String[] lastNames = {"Doe", "Jones", "West", "Long", "Johnson", "White", "Walker", "Brown", "Clark", "Wilson"};
     String firstName;
     String lastName;
+
+    public User(BusList B){
+        try {
+            B.insert(50);
+        }catch (Exception e){
+
+        }
+    }
     public void run(){
 
     }

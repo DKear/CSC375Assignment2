@@ -8,17 +8,13 @@ public class BusList {
     //if there is no space, it either terminates or it keeps looking (decide)
 
     public Bus head;
-    public Bus tail;
+    public int size;
 
-    private Bus findBusToInsertAfter(Bus bus) throws InterruptedException{
-        Bus current = this.head;
-        current.lock.readLock();
-        bus.lock.readLock();
+    private synchronized Bus findBusToInsertAfter(Bus newBus) {
+        Bus curBus = this.head;
         //if the new bus has less remaining seats than the current bus (starting at head)
         //return null
-        if(bus.remainingSeats < current.remainingSeats){
-            current.lock.readUnlock();
-            bus.lock.readUnlock();
+        if (newBus.remainingSeats < curBus.remainingSeats) {
             return null;
         }
         //new bus has more or equal remaining seats than the current bus
@@ -26,53 +22,53 @@ public class BusList {
         //-if the new bus has the same amount of seats as the current bus, return the current bus
         //--then check if the new bus has more remaining seats than the current but less than the one after that, if so return current bus
         //-larger than the current and the next, move on to the next. Move on to the next and loop until end.
-        while(current.next != null){
-            if(bus.remainingSeats == current.remainingSeats){
-                current.lock.readUnlock();
-                bus.lock.readUnlock();
-                return current;
-            }else if(bus.remainingSeats > current.remainingSeats & bus.remainingSeats < current.next.remainingSeats){
-                current.lock.readUnlock();
-                bus.lock.readUnlock();
-                return current;
+        while(curBus.next != null) {
+            if (newBus.remainingSeats == curBus.remainingSeats) {
+                return curBus;
             }
-            current.lock.readUnlock();
-            bus.lock.readUnlock();
-            current.lock.writeLock();
-            current = current.next;
-            current.lock.writeUnlock();
-            current.lock.readLock();
-            bus.lock.readLock();
+            else if (newBus.remainingSeats > curBus.remainingSeats && newBus.remainingSeats < curBus.next.remainingSeats) {
+                return curBus;
+            }
+            curBus = curBus.next;
         }
-        current.lock.readUnlock();
-        bus.lock.readUnlock();
-        return current;
+        return curBus;
     }
 
-    public void insert(int value) throws InterruptedException{
+    public synchronized void insert(int value) {
         Bus newBus = new Bus();
         newBus.remainingSeats = value;
         Bus busToInsertAfter;
+        if (this.head == null) {
+            this.head = newBus;
+            this.size++;
+        } else {
+            busToInsertAfter = findBusToInsertAfter(newBus);
+            if (busToInsertAfter == null || busToInsertAfter.remainingSeats != newBus.remainingSeats) {
 
-            if (this.head == null) {
-                this.head.lock.writeLock();
-                this.head = newBus;
-                this.head.next = this.tail;
-                this.head.lock.writeUnlock();
-
-            }else{
-                busToInsertAfter = findBusToInsertAfter(newBus);
-                busToInsertAfter.lock.readLock();
-                if(busToInsertAfter == null | busToInsertAfter.remainingSeats != newBus.remainingSeats){
-                    //insert the node
+                Bus tmpBus;
+                if (busToInsertAfter == null) {
+                    this.head.prev = newBus;
+                    tmpBus  = this.head;
+                    this.head = newBus;
+                    this.head.next = tmpBus;
+                    if (this.size <= 1) {
+                    }
+                } else if (busToInsertAfter.next == null) {
+                    newBus.prev = busToInsertAfter;
+                    busToInsertAfter.next = newBus;
+                } else {
+                    Bus prevBus, nextBus;
+                    prevBus = busToInsertAfter;
+                    nextBus = busToInsertAfter.next;
+                    prevBus.next = newBus;
+                    newBus.prev = prevBus;
+                    newBus.next = nextBus;
+                    nextBus.prev = newBus;
                 }
-                busToInsertAfter.lock.readUnlock();
-
+                this.size++;
             }
 
-
-
-
+        }
     }
 
 }
