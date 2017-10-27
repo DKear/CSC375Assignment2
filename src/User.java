@@ -11,7 +11,7 @@ public class User implements Runnable {
 
     public User(BusList B){
         try {
-            B.insert(50);
+            //B.insert(50);
         }catch (Exception e){
 
         }

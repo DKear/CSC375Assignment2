@@ -1,82 +1,165 @@
 public class BusList {
 
-    //any thread can read a bus' remaining seats at any time
-    //to make a write, a thread first has to read the bus to validate that there are enough seats
-    //only one thread can write/modify a bus at a time, any other thread must wait.
-    //when a bus is written/modified a copy will be made and inserted into the linkedlist, and the old bus deleted
-    //once a thread is signaled/done waiting, it re-reads the thread to verify there is still space
-    //if there is no space, it either terminates or it keeps looking (decide)
+    public class Bus {
 
-    public Bus head;
-    public int size;
+        //volatile public Bus prev;
+        volatile public Bus next;
+        volatile public int remainingSeats = 50;
+        public String busID;
+        final Lock lock = new Lock();
+        final public User[] passengers = new User[50];
 
-    private synchronized Bus findBusToInsertAfter(Bus newBus) {
-        Bus curBus = this.head;
-        //if the new bus has less remaining seats than the current bus (starting at head)
-        //return null
-        if (newBus.remainingSeats < curBus.remainingSeats) {
-            return null;
-        }
-        //new bus has more or equal remaining seats than the current bus
-        //while there is a next bus do:
-        //-if the new bus has the same amount of seats as the current bus, return the current bus
-        //--then check if the new bus has more remaining seats than the current but less than the one after that, if so return current bus
-        //-larger than the current and the next, move on to the next. Move on to the next and loop until end.
-        while(curBus.next != null) {
-            if (newBus.remainingSeats == curBus.remainingSeats) {
-                return curBus;
-            }
-            else if (newBus.remainingSeats > curBus.remainingSeats && newBus.remainingSeats < curBus.next.remainingSeats) {
-                return curBus;
-            }
-            curBus = curBus.next;
-        }
-        return curBus;
     }
+    volatile public Bus head;
+    volatile Bus sorted = new Bus();
+    final Lock lock = new Lock();
 
-    public synchronized void insert(int value) {
+
+
+
+    void push(int val, String s) throws InterruptedException{
+		/* allocate Bus */
         Bus newBus = new Bus();
-        newBus.remainingSeats = value;
-        Bus busToInsertAfter;
-        if (this.head == null) {
-            this.head = newBus;
-            this.size++;
-        } else {
-            busToInsertAfter = findBusToInsertAfter(newBus);
-            if (busToInsertAfter == null || busToInsertAfter.remainingSeats != newBus.remainingSeats) {
+        newBus.remainingSeats = val;
+        newBus.busID = s;
+		/* link the old list off the new Bus */
+		this.lock.writeLock();
+        newBus.next = head;
+		/* move the head to point to the new Bus */
+        head = newBus;
+        this.lock.writeUnlock();
+    }
 
-                Bus tmpBus;
-                if (busToInsertAfter == null) {
-                    this.head.prev = newBus;
-                    tmpBus  = this.head;
-                    this.head = newBus;
-                    this.head.next = tmpBus;
-                    if (this.size <= 1) {
-                    }
-                } else if (busToInsertAfter.next == null) {
-                    newBus.prev = busToInsertAfter;
-                    busToInsertAfter.next = newBus;
-                } else {
-                    Bus prevBus, nextBus;
-                    prevBus = busToInsertAfter;
-                    nextBus = busToInsertAfter.next;
-                    prevBus.next = newBus;
-                    newBus.prev = prevBus;
-                    newBus.next = nextBus;
-                    nextBus.prev = newBus;
-                }
-                this.size++;
-            } else{
-                newBus.prev = busToInsertAfter;
-                busToInsertAfter.next = newBus;
-                this.size++;
+
+
+    // function to sort a singly linked list using insertion sort
+    void insertionSort(Bus headref) throws InterruptedException{
+        // Initialize sorted linked list
+
+        this.lock.writeLock();
+        sorted = null;
+        this.lock.writeUnlock();
+
+        this.lock.writeLock();
+        Bus current = headref;
+        this.lock.writeUnlock();
+        // Traverse the given linked list and insert every
+        // Bus to sorted
+        boolean loopEntered = false;
+        this.lock.readLock();
+        while (current != null){
+            loopEntered = true;
+            this.lock.readUnlock();
+            // Store next for next iteration
+            current.lock.readLock();
+            Bus next = current.next;
+            current.lock.readUnlock();
+            // insert current in sorted linked list
+            this.lock.writeLock();
+            sortedInsert(current);
+            // Update current
+            current = next;
+            this.lock.writeUnlock();
+
+        }
+        if(!loopEntered) {
+            this.lock.readUnlock();
+        }
+        // Update head_ref to point to sorted linked list
+        this.lock.writeLock();
+        head = sorted;
+        this.lock.writeUnlock();
+    }
+
+    /*
+    * function to insert a new_Bus in a list. Note that
+    * this function expects a pointer to head_ref as this
+    * can modify the head of the input linked list
+    * (similar to push())
+    */
+    void sortedInsert(Bus newBus)
+    {
+		/* Special case for the head end */
+        if (sorted == null || sorted.remainingSeats >= newBus.remainingSeats)
+        {
+            newBus.next = sorted;
+            sorted = newBus;
+        }
+        else
+        {
+            Bus current = sorted;
+			/* Locate the Bus before the point of insertion */
+            while (current.next != null && current.next.remainingSeats < newBus.remainingSeats)
+            {
+                current = current.next;
             }
-
+            newBus.next = current.next;
+            current.next = newBus;
         }
     }
 
-    public synchronized void delete(){
-        
+    public Boolean search(String s){
+        Bus temp = head;
+        Boolean search = false;
+
+        if(head.busID.equals(s)){
+            search = true;
+        } else{
+            while(temp.next != null){
+                if(temp.busID.equals(s)){
+                    search = true;
+                    break;
+                } else{
+                    temp = temp.next;
+                }
+            }
+        }
+        return search;
+    }
+
+    public void delete(String s) throws InterruptedException{
+        this.lock.readLock();
+        if(head.busID.equals(s)){
+            this.lock.readUnlock();
+            this.lock.writeLock();
+            head = head.next;
+            this.lock.writeUnlock();
+        } else{
+            this.lock.readUnlock();
+            this.lock.writeLock();
+            Bus temp = head;
+            this.lock.writeUnlock();
+            boolean loopEntered = false;
+            this.lock.readLock();
+            while (temp.next != null){
+                loopEntered = true;
+                if(temp.next.busID.equals(s)){
+                    this.lock.readUnlock();
+                    this.lock.writeLock();
+                    temp.next = temp.next.next;
+                    this.lock.writeUnlock();
+                    break;
+                }else{
+                    this.lock.readUnlock();
+                    this.lock.writeLock();
+                    temp = temp.next;
+                    this.lock.writeUnlock();
+                }
+            } if(!loopEntered){
+                this.lock.readLock();
+            }
+        }
+
+    }
+
+    /* Function to print linked list */
+    void printlist(Bus head)
+    {
+        while (head != null)
+        {
+            System.out.print(head.remainingSeats + " ");
+            head = head.next;
+        }
     }
 
 }
