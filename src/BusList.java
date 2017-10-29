@@ -258,8 +258,8 @@ public class BusList {
 
     public void insertPassengers(Bus b, int sr, String n) throws InterruptedException{
         this.lock.writeLock();
-        for (int i = 50 - b.remainingSeats; i < sr; i++) {
-            b.passengers[i] = (n);
+        for (int j = 50 - b.remainingSeats, i = 0; i < sr; i++,j++) {
+            b.passengers[j] = (n);
         }
         this.lock.writeUnlock();
     }

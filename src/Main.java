@@ -26,11 +26,11 @@ public class Main {
 
             bookThread1.start();
             //bookThread2.wait(20000,20000);
-            bookThread2.start();
+            //bookThread2.start();
             //bookThread3.start();
 
             bookThread1.join();
-            bookThread2.join();
+            //bookThread2.join();
             //bookThread3.join();
 
 
