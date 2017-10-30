@@ -2,29 +2,30 @@ import java.util.Random;
 
 public class User implements Runnable {
 
-    final Random random = new Random();
-    final int requiredSeats = 50;
-    final String[] firstNames = {"John", "James", "Bill", "David", "Doug", "Chris", "Dan", "Tom", "Clayton", "Connor", "Sarah", "Nikki", "Madison", "Kim", "Michelle", "Olivia", "Elizabeth", "Alicia", "Viana", "Christine"};
-    final String[] lastNames = {"Doe", "Jones", "West", "Long", "Johnson", "White", "Walker", "Brown", "Clark", "Wilson"};
+
+    int requiredSeats;
     String firstName;
     String lastName;
     BusList BL;
 
-    public User(BusList B){
+    public User(BusList B, String fn, String ln, int rs){
         BL = B;
-       firstName = firstNames[random.nextInt(firstNames.length - 1 )];
-       lastName = lastNames[random.nextInt(lastNames.length - 1 )];
+       firstName = fn;
+       lastName = ln;
+       requiredSeats = rs;
     }
     public void run(){
 
-        bookTicket(BL);
-        bookTicket(BL);
-        bookTicket(BL);
-        bookTicket(BL);
-        bookTicket(BL);
-        bookTicket(BL);
+        try {
+            userBookTicket(BL);
+        }catch(InterruptedException e){
+        }
 
 
+    }
+
+    public void userBookTicket(BusList b) throws InterruptedException{
+        b.bookTicket(this);
     }
 
     public void bookTicket(BusList b){

@@ -34,64 +34,55 @@ public class BusList {
     }
     */
 
-     void push(Bus b) throws InterruptedException{
+     void push(Bus b) throws InterruptedException {
+         //System.out.println("----------------push--------------");
+         //this.lock.writeLock();
+         //try {
 
-        Bus newBus = new Bus(b.busID, b.remainingSeats, b.passengers);
-		/* link the old list off the new Bus */
-        this.lock.writeLock();
-        newBus.next = head;
-        this.lock.writeUnlock();
-		/* move the head to point to the new Bus */
-		this.lock.writeLock();
-        head = newBus;
-        this.lock.writeUnlock();
-    }
+             Bus newBus = new Bus(b.busID, b.remainingSeats, b.passengers);
+
+             newBus.next = head;
+             head = newBus;
+         //} finally {
+         //    this.lock.writeUnlock();
+         //}
+     }
 
 
 
     // function to sort a singly linked list using insertion sort
-     void insertionSort(Bus headref) throws InterruptedException{
+      void insertionSort(Bus headref) throws InterruptedException{
+          //System.out.println("------------------insertionSort---------");
         // Initialize sorted linked list
 
-        this.lock.writeLock();
-        sorted = null;
-        this.lock.writeUnlock();
+        //this.lock.writeLock();
+        //try {
 
-        this.lock.writeLock();
-        Bus current = headref;
-        this.lock.writeUnlock();
-        // Traverse the given linked list and insert every
-        // Bus to sorted
-        boolean loopEntered = false;
-        this.lock.readLock();
-        while (current != null){
-            System.out.println("loop at 63 running");
-            if(!loopEntered){
-                this.lock.readUnlock();
+            sorted = null;
+
+
+            Bus current = headref;
+
+            while (current != null) {
+                //System.out.println("loop at 59 running");
+
+
+                Bus next = current.next;
+
+
+                sortedInsert(current);
+
+                current = next;
+
+
             }
-            loopEntered = true;
-            // Store next for next iteration
-            this.lock.readLock();
-            Bus next = current.next;
-            this.lock.readUnlock();
-            // insert current in sorted linked list
-            //this.lock.writeLock();
-            sortedInsert(current);
-            //this.lock.writeUnlock();
-            // Update current
-            this.lock.writeLock();
-            current = next;
-            this.lock.writeUnlock();
 
-        }
-        if(!loopEntered) {
-            this.lock.readUnlock();
-        }
-        // Update head_ref to point to sorted linked list
-        this.lock.writeLock();
-        head = sorted;
-        this.lock.writeUnlock();
-    }
+
+            head = sorted;
+        //}finally {
+        //    this.lock.writeUnlock();
+        //}
+     }
 
     /*
     * function to insert a new_Bus in a list. Note that
@@ -99,169 +90,160 @@ public class BusList {
     * can modify the head of the input linked list
     * (similar to push())
     */
-    void sortedInsert(Bus newBus)throws InterruptedException{
-		/* Special case for the head end */
-		this.lock.readLock();
-        if (sorted == null || sorted.remainingSeats >= newBus.remainingSeats)
-        {
-            this.lock.readUnlock();
-            this.lock.writeLock();
-            newBus.next = sorted;
-            this.lock.writeUnlock();
-            this.lock.writeLock();
-            sorted = newBus;
-            this.lock.writeUnlock();
+     private void sortedInsert(Bus newBus)throws InterruptedException {
+         //System.out.println("-----------sortedInsert-------------");
+        /* Special case for the head end */
+         if (sorted == null || sorted.remainingSeats >= newBus.remainingSeats) {
+             newBus.next = sorted;
+             sorted = newBus;
 
-        }
-        else
-        {
-            this.lock.readUnlock();
-            this.lock.writeLock();
-            Bus current = sorted;
-            this.lock.writeUnlock();
-            boolean loopEntered = false;
-            this.lock.readLock();
-			/* Locate the Bus before the point of insertion */
-            while (current.next != null && current.next.remainingSeats < newBus.remainingSeats){
-                if(!loopEntered){
-                    this.lock.readUnlock();
-                }
-                loopEntered = true;
-                System.out.println("loop at 107 running");
-                this.lock.writeLock();
-                current = current.next;
-                this.lock.writeUnlock();
-            }if(!loopEntered) {
-            this.lock.readUnlock();
-        }
-            this.lock.writeLock();
-            newBus.next = current.next;
-            this.lock.writeUnlock();
-            this.lock.writeLock();
-            current.next = newBus;
-            this.lock.writeUnlock();
-        }
-    }
+         } else {
+             Bus current = sorted;
+            /* Locate the Bus before the point of insertion */
+             while (current.next != null && current.next.remainingSeats < newBus.remainingSeats) {
+                 //System.out.println("loop at 95 running");
+
+                 current = current.next;
+             }
+
+                 newBus.next = current.next;
+                 current.next = newBus;
+             }
+         }
+
 
      public Bus searchForValidBus(int seatsRequested) throws InterruptedException{
-        this.lock.readLock();
-        Bus temp = head;
-        this.lock.readUnlock();
+         //System.out.println("-------------searchForValidBus-----------------");
 
-        this.lock.readLock();
-        if(head.remainingSeats >= seatsRequested & head.remainingSeats > 0){
-            this.lock.readUnlock();
-            synchronized (head) {
-                return head;
-            }
-        } else{
-            this.lock.readUnlock();
-            this.lock.readLock();
-            boolean loopEntered = false;
-            while(temp != null){
-                if(!loopEntered){
-                    this.lock.readUnlock();
-                }
-                System.out.println("loop at 132 running");
-                loopEntered = true;
-                if(temp.remainingSeats >= seatsRequested){
-                    synchronized (temp) {
-                        return temp;
-                    }
+         //this.lock.writeLock();
+         //try {
+             Bus temp = head;
 
-                } else{
-                    this.lock.writeLock();
-                    temp = temp.next;
-                    this.lock.writeUnlock();
-                }
-            }if(!loopEntered){
-                this.lock.readUnlock();
-            }
-        }
-        return null;
+             if (head.remainingSeats >= seatsRequested & head.remainingSeats > 0) {
+
+                 return head;
+
+             } else {
+                 while (temp != null) {
+
+                     //System.out.println("loop at 118 running");
+                     if (temp.remainingSeats >= seatsRequested) {
+
+                         return temp;
+
+
+                     } else {
+                         temp = temp.next;
+                     }
+                 }
+             }
+             return null;
+
+         //}finally {
+
+
+         //    this.lock.writeUnlock();
+         //}
+
+
     }
     public Bus searchByString(String s) throws InterruptedException{
-        this.lock.readLock();
-        Bus temp = head;
-        this.lock.readUnlock();
-        Boolean search = false;
 
-        this.lock.readLock();
+
+        Bus temp = head;
+
         if(head.busID.equals(s)){
-            this.lock.readUnlock();
             synchronized (head) {
                 return head;
             }
         } else{
-            this.lock.readUnlock();
-            this.lock.readLock();
-            boolean loopEntered = false;
             while(temp.next != null){
-                if(!loopEntered){
-                    this.lock.readUnlock();
-                }
-                System.out.println("loop at 169 running");
-                loopEntered = true;
+                //System.out.println("loop at 148 running");
+
+
                 if(temp.busID.equals(s)){
                     synchronized (temp) {
                         return temp;
                     }
 
                 } else{
-                    this.lock.writeLock();
                     temp = temp.next;
-                    this.lock.writeUnlock();
                 }
-            }if(!loopEntered){
-                this.lock.readUnlock();
             }
         }
         return null;
     }
 
      public void delete(String s) throws InterruptedException{
-        this.lock.readLock();
-        if(head.busID.equals(s)){
-            this.lock.readUnlock();
-            this.lock.writeLock();
-            head = head.next;
-            this.lock.writeUnlock();
-        } else{
-            this.lock.readUnlock();
-            this.lock.writeLock();
-            Bus temp = head;
-            this.lock.writeUnlock();
-            boolean loopEntered = false;
-            this.lock.readLock();
-            while (temp.next != null){
-                if(!loopEntered){
-                    this.lock.readUnlock();
-                }
-                System.out.println("loop at 205 running");
-                loopEntered = true;
-                if(temp.next.busID.equals(s)){
-                    this.lock.writeLock();
-                    temp.next = temp.next.next;
-                    this.lock.writeUnlock();
-                    break;
-                }else{
-                    this.lock.writeLock();
-                    temp = temp.next;
-                    this.lock.writeUnlock();
-                }
-            } if(!loopEntered){
-                this.lock.readLock();
-            }
-        }
+         //System.out.println("----------------------------delete------------------");
+         //this.lock.writeLock();
+         //try {
+             if (head.busID.equals(s)) {
+                 head = head.next;
+             } else {
+                 Bus temp = head;
+                 while (temp.next != null) {
 
+                     //System.out.println("loop at 172 running");
+                     if (temp.next.busID.equals(s)) {
+                         temp.next = temp.next.next;
+                         break;
+                     } else {
+                         temp = temp.next;
+                     }
+                 }
+             }
+         //}finally {
+
+
+         //    this.lock.writeUnlock();
+         //}
     }
 
     public void insertPassengers(Bus b, int sr, String n) throws InterruptedException{
+        //System.out.println("----------------insertPassengers----------------");
+        //this.lock.writeLock();
+        //try {
+            for (int j = 50 - b.remainingSeats, i = 0; i < sr; i++, j++) {
+                //System.out.println("insertPassenger looping");
+                b.passengers[j] = (n);
+            }
+            //System.out.println("insertPassenger loop terminated");
+        //}finally {
+            //System.out.println("should unlock now");
+        //    this.lock.writeUnlock();
+        //}
+    }
+
+    public void bookTicket(User u) throws InterruptedException{
+        System.out.println("Entered bookTicket");
+
         this.lock.writeLock();
-        for (int j = 50 - b.remainingSeats, i = 0; i < sr; i++,j++) {
-            b.passengers[j] = (n);
+        try {
+            //Bus temp = b.searchForValidBus(requiredSeats);
+            Bus ref = this.searchForValidBus(u.requiredSeats);
+
+            //temp
+            if (ref != null) {
+                Bus temp = new Bus(ref.busID, ref.remainingSeats, ref.passengers);
+                this.insertPassengers(temp, u.requiredSeats, u.firstName.concat(u.lastName));
+                temp.remainingSeats = temp.remainingSeats - u.requiredSeats;
+                this.delete(temp.busID);
+                this.insertionSort(this.head);
+                this.push(temp);
+                this.insertionSort(this.head);
+
+
+            } else {
+                //Bus replacement = temp;
+                System.out.println("ALL BUSSES FULL");
+
+            }
+        }finally{
+            this.lock.writeUnlock();
         }
-        this.lock.writeUnlock();
+
+
     }
 
     /* Function to print linked list */
