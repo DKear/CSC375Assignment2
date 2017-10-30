@@ -1,6 +1,8 @@
 //import com.sun.org.apache.xpath.internal.operations.Bool;
 
-public class BusList {
+import java.util.Random;
+
+public class CustomBusList {
 
     /*public class Bus {
 
@@ -208,6 +210,7 @@ public class BusList {
                 //System.out.println("insertPassenger looping");
                 b.passengers[j] = (n);
             }
+        System.out.println(n + " booked " + sr + " seats on " + b.busID);
             //System.out.println("insertPassenger loop terminated");
         //}finally {
             //System.out.println("should unlock now");
@@ -215,8 +218,7 @@ public class BusList {
         //}
     }
 
-    public void bookTicket(User u) throws InterruptedException{
-        System.out.println("Entered bookTicket");
+    public void bookTicket(BookingUser u) throws InterruptedException{
 
         this.lock.writeLock();
         try {
@@ -226,7 +228,7 @@ public class BusList {
             //temp
             if (ref != null) {
                 Bus temp = new Bus(ref.busID, ref.remainingSeats, ref.passengers);
-                this.insertPassengers(temp, u.requiredSeats, u.firstName.concat(u.lastName));
+                this.insertPassengers(temp, u.requiredSeats, u.firstName.concat(" "+ u.lastName));
                 temp.remainingSeats = temp.remainingSeats - u.requiredSeats;
                 this.delete(temp.busID);
                 this.insertionSort(this.head);
@@ -236,7 +238,7 @@ public class BusList {
 
             } else {
                 //Bus replacement = temp;
-                System.out.println("ALL BUSSES FULL");
+                System.out.println(u.firstName + " " + u.lastName + "looked to book, but found no valid bus.");
 
             }
         }finally{
@@ -245,6 +247,22 @@ public class BusList {
 
 
     }
+
+    public void readList(Bus head, ViewingUser u)throws InterruptedException{
+         this.lock.readLock();
+         try {
+             Bus temp = head;
+             while (temp != null) {
+                 System.out.println(u.firstName + " " + u.lastName + " viewed " + temp.busID);
+                 temp = temp.next;
+             }
+         }finally{
+             this.lock.readUnlock();
+         }
+
+    }
+
+
 
     /* Function to print linked list */
     void printlist(Bus head)

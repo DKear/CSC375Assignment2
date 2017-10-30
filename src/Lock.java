@@ -16,8 +16,8 @@ public class Lock {
 
     public void readLock() throws InterruptedException{
         lock.lock();
-        System.out.println("readLock lock");
-        printState();
+        //System.out.println("readLock lock");
+        //printState();
         try{
             for(;;){
                 if(writes == 0 && writeRequests == 0){
@@ -31,19 +31,19 @@ public class Lock {
             }
         } finally{
             lock.unlock();
-            System.out.println("readLock unlock");
-            printState();
+            //System.out.println("readLock unlock");
+            //printState();
         }
     }
 
     public void readUnlock(){
         lock.lock();
-        System.out.println("readUnlock lock");
-        printState();
+        //System.out.println("readUnlock lock");
+        //printState();
         try{
             if(--reads == 0){
 
-                if(writeRequests== 0){
+                if(writeRequests > 0){
                     writeCondition.signal();
                 }else{
                     readCondition.signalAll();
@@ -51,22 +51,22 @@ public class Lock {
             }
         }finally{
             lock.unlock();
-            System.out.println("readUnlock unlock");
-            printState();
+            //System.out.println("readUnlock unlock");
+            //printState();
         }
     }
 
     public   void writeLock() throws InterruptedException{
         lock.lock();
-        System.out.println("writeLock lock");
-        printState();
+        //System.out.println("writeLock lock");
+        //printState();
         try{
             for(;;){
                 if(reads == 0 && writes==0){
                     break;
                 }
                 ++writeRequests;
-                System.out.println("write Awaiting------");
+                //System.out.println("write Awaiting------");
                 writeCondition.await();
                 --writeRequests;
 
@@ -74,16 +74,16 @@ public class Lock {
             ++writes;
         }finally{
             lock.unlock();
-            System.out.println("writeLock unlock");
-            printState();
+            //System.out.println("writeLock unlock");
+            //printState();
         }
     }
 
     public void writeUnlock() throws InterruptedException{
-        System.out.println("trying to get writeUnlock lock");
+        //System.out.println("trying to get writeUnlock lock");
         lock.lock();
-        System.out.println("writeUnlock lock");
-        printState();
+        //System.out.println("writeUnlock lock");
+        //printState();
         try{
             if(--writes == 0){
 
@@ -95,8 +95,8 @@ public class Lock {
             }
         }finally{
             lock.unlock();
-            System.out.println("writeUnlock unlock");
-            printState();
+            //System.out.println("writeUnlock unlock");
+            //printState();
         }
     }
     private void printState(){

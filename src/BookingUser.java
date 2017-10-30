@@ -1,14 +1,12 @@
-import java.util.Random;
-
-public class User implements Runnable {
+public class BookingUser implements Runnable {
 
 
     int requiredSeats;
     String firstName;
     String lastName;
-    BusList BL;
+    CustomBusList BL;
 
-    public User(BusList B, String fn, String ln, int rs){
+    public BookingUser(CustomBusList B, String fn, String ln, int rs){
         BL = B;
        firstName = fn;
        lastName = ln;
@@ -16,19 +14,21 @@ public class User implements Runnable {
     }
     public void run(){
 
+
+
         try {
-            userBookTicket(BL);
+            BL.bookTicket(this);
         }catch(InterruptedException e){
         }
 
 
     }
 
-    public void userBookTicket(BusList b) throws InterruptedException{
+    public void userBookTicket(CustomBusList b) throws InterruptedException{
         b.bookTicket(this);
     }
 
-    public void bookTicket(BusList b){
+    public void bookTicket(CustomBusList b){
         try{
             //Bus temp = b.searchForValidBus(requiredSeats);
             Bus ref = b.searchForValidBus(requiredSeats);
@@ -36,7 +36,7 @@ public class User implements Runnable {
             //temp
             if(ref != null){
                 Bus temp = new Bus(ref.busID, ref.remainingSeats, ref.passengers);
-                b.insertPassengers(temp, requiredSeats, firstName.concat(" " + lastName));
+                b.insertPassengers(temp, requiredSeats, firstName + " " + lastName);
                 temp.remainingSeats = temp.remainingSeats - requiredSeats;
                 b.delete(temp.busID);
                 b.insertionSort(b.head);
@@ -56,7 +56,7 @@ public class User implements Runnable {
 
     }
 
-    public void read(BusList busList){
+    public void read(CustomBusList customBusList){
 
     }
 }
