@@ -1,3 +1,4 @@
+package org.sample;
 public class PriorityBlockingQBookingUser implements Runnable {
     int requiredSeats;
     String firstName;
