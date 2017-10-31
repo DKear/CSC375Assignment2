@@ -1,3 +1,4 @@
+package org.sample;
 import java.util.ArrayList;
 import java.util.Random;
 
