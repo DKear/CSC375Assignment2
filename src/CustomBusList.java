@@ -238,7 +238,7 @@ public class CustomBusList {
 
             } else {
                 //Bus replacement = temp;
-                System.out.println(u.firstName + " " + u.lastName + "looked to book, but found no valid bus.");
+                System.out.println(u.firstName + " " + u.lastName + " looked to book, but found no valid bus.");
 
             }
         }finally{
@@ -250,6 +250,7 @@ public class CustomBusList {
 
     public void readList(Bus head, ViewingUser u)throws InterruptedException{
          this.lock.readLock();
+
          try {
              Bus temp = head;
              while (temp != null) {
