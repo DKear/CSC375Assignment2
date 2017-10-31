@@ -1,3 +1,4 @@
+package org.sample;
 public class PriorityBlockingQViewingUser implements Runnable{
     String firstName;
     String lastName;
